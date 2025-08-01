@@ -31,13 +31,21 @@ router.get('/', async function(req, res, next) {
 });
 
 /* GET crear page (http://localhost:3000/crear) */
-// ¡ESTA ES LA RUTA NUEVA QUE SOLUCIONA EL ERROR 404!
+// CÓDIGO CORREGIDO en routes/index.js
 router.get('/crear', isLoggedIn, function(req, res, next) {
-  const fullUrl = req.protocol + '://' + req.get('host') + '/mapa/' + req.user._id;
+  // 1. Detecta si la app está en producción (en Render) o en desarrollo (localhost)
+  // req.protocol nos da "https" en Render y "http" en localhost.
+  // req.get('host') nos da "madrid-de-bolsillo.onrender.com" o "localhost:3000".
+  const baseUrl = `${req.protocol}://${req.get('host')}`;
+  
+  // 2. Construye la URL completa para compartir
+  const shareUrl = `${baseUrl}/mapa/${req.user._id}`;
+  
+  // 3. Pasa la URL a la vista 'crear.ejs'
   res.render('crear', { 
     title: 'Crear Nuevo Plan', 
     user: req.user,
-    shareUrl: fullUrl  // ✅ URL lista
+    shareUrl: shareUrl // <--- Aquí pasamos la nueva variable
   });
 });
 router.get('/index', (req, res) => {
@@ -76,6 +84,7 @@ router.get('/contacto', function(req, res, next) {
   });
 });
 
+// Está registrado?
 // Está registrado?
 function isLoggedIn (req, res, next) {
   if (req.isAuthenticated()) {

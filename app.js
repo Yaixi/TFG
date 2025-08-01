@@ -28,18 +28,32 @@ var app = express();
 
 // --- CONEXIÓN A LA BASE DE DATOS ---
 const mongoDB = 'mongodb+srv://yaizamunozgonzalez:1234@madriddebolsillo.ahd8y8d.mongodb.net/';
+
+//const mongoDB = process.env.MONGO_URI;
 mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 db.once('open', () => console.log('Conectado a la Base de Datos'));
 
 // --- CONFIGURACIÓN DE MIDDLEWARE ---
+// CÓDIGO NUEVO (SEGURO)
+/*app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false, 
+    store: MongoStore.create({ mongoUrl: mongoDB })
+  })
+);*/
 app.use(
   session({
-    secret: "very secret this is",
+    secret: "un-secreto-muy-bien-guardado-y-largo", // O process.env.SESSION_SECRET
     resave: false,
-    saveUninitialized: true,
-    store: new MongoStore({ mongooseConnection: mongoose.connection })
+    saveUninitialized: true, // O false, dependiendo de tu necesidad
+    store: new MongoStore({ // <<<--- SE USA 'new MongoStore'
+      mongooseConnection: mongoose.connection, // <<<--- SE PASA LA CONEXIÓN DE MONGOOSE
+      collection: 'sessions' // Opcional: nombre de la colección
+    })
   })
 );
 app.use(passport.initialize());
